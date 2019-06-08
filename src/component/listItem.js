@@ -7,7 +7,7 @@ const ListItem = (props) => (
         <FlatList
             keyExtractor={(item, index) => index.toString()}
             data={props.listData}
-            style={{ backgroundColor: '#fff', height: "100%" }}
+            style={{height: "100%" }}
             renderItem={({ item }) =>
                 <Item item={item} />
             }

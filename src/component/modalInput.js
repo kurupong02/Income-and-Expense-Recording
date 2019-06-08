@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import { View, Text, TextInput, Button, TouchableHighlight } from 'react-native';
+import { View, Text, TextInput, Button, TouchableHighlight, StyleSheet } from 'react-native';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import Moment from 'moment';
 import Modal from "react-native-modal";
@@ -25,7 +25,7 @@ class modalInput extends Component {
         };
     }
 
-    isDateTimePicker = () => {
+    showDateTimePicker = () => {
         this.props.isModal()
         setTimeout(() => {
             this.setState({ datePickerVisible: !this.state.datePickerVisible });
@@ -40,11 +40,8 @@ class modalInput extends Component {
     };
 
     handleDatePicked = date => {
-        this.setState({ datePickerVisible: !this.state.datePickerVisible });
-        setTimeout(() => {
-            this.props.isModal()
-            this.setState({ date })
-        }, 500);
+        this.setState({ date })
+        this.cancelDateTimePicker()
     };
 
     handleTitlePicked = title => {
@@ -60,13 +57,16 @@ class modalInput extends Component {
             date: new Date(date)
         }
         const headers = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            }
         }
-        API.post(`/items`, bodyJSON, { headers: headers })
+
+        API.post(`/items`, bodyJSON, headers)
             .then((response) => {
                 if (response.status == 200) {
-                    this.props.refresh()
+                    this.props.getData()
                     this.handleCancel()
                 }
             })
@@ -97,13 +97,13 @@ class modalInput extends Component {
                     date={date}
                 />
                 <Modal isVisible={this.props.isModalVisible} onBackdropPress={this.handleCancel} >
-                    <View style={{ backgroundColor: '#fff', padding: 10, justifyContent: '' }}>
+                    <View style={{ backgroundColor: '#fff', padding: 10 }}>
                         <Text>เพิ่ม</Text>
-                        <View style={{ flexDirection: 'row', marginTop: 10, }}>
+                        <View style={styles.viewRow}>
                             <Text style={{ marginTop: 10 }}>วันที่ : </Text>
-                            <Button title={Moment(date).format('L')} onPress={this.isDateTimePicker}></Button>
+                            <Button title={Moment(date).format('L')} onPress={this.showDateTimePicker}></Button>
                         </View>
-                        <View style={{ flexDirection: 'row', marginTop: 10, }}>
+                        <View style={styles.viewRow}>
                             <View style={{ width: 100 }}>
                                 <Dropdown
                                     data={data}
@@ -112,34 +112,26 @@ class modalInput extends Component {
                                 />
                             </View>
                             <TextInput
-                                style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginTop: 10, padding: 10, flex: 1 }}
+                                style={styles.textInput}
                                 onChangeText={(description) => this.setState({ description })}
                                 value={description.toString()}
                                 placeholder='รายละเอียด'
                             />
                         </View>
-                        <TextInput
-                            style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginTop: 10, padding: 10 }}
-                            onChangeText={(value) => this.setState({ value })}
-                            value={value.toString()}
-                            placeholder='0'
-                        />
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
-                            <TouchableHighlight
-                                style={{ width: 100, justifyContent: 'center', margin: 5, backgroundColor: '#00C853' }}
-                                onPress={this.handleConfirm}>
-                                <View style={{ alignItems: 'center', padding: 5 }}>
-                                    <Text style={{ fontSize: 16, color: '#fff' }}>
-                                        ยืนยัน
-                                    </Text>
-                                </View>
+                        <View style={styles.viewRow}>
+                            <TextInput
+                                style={styles.textInput}
+                                onChangeText={(value) => this.setState({ value })}
+                                value={value.toString()}
+                                placeholder='0'
+                            />
+                        </View>
+                        <View style={styles.buttonGroup}>
+                            <TouchableHighlight style={styles.buttonConfirm} onPress={this.handleConfirm}>
+                                <Text style={{ color: '#fff' }}>ยืนยัน</Text>
                             </TouchableHighlight>
-                            <TouchableHighlight style={{ width: 100, justifyContent: 'center', margin: 5, backgroundColor: '#B71C1C' }} onPress={this.handleCancel}>
-                                <View style={{ alignItems: 'center', padding: 5 }}>
-                                    <Text style={{ fontSize: 16, color: '#fff' }}>
-                                        ยกเลิก
-                                    </Text>
-                                </View>
+                            <TouchableHighlight style={styles.buttonCancel} onPress={this.handleCancel}>
+                                <Text style={{ color: '#fff' }}>ยกเลิก</Text>
                             </TouchableHighlight>
                         </View>
                     </View>
@@ -148,5 +140,37 @@ class modalInput extends Component {
         );
     }
 }
+
+const styles = StyleSheet.create({
+    buttonConfirm: {
+        width: 100,
+        alignItems: 'center',
+        backgroundColor: '#00C853',
+        padding: 5
+    },
+    buttonCancel: {
+        width: 100,
+        alignItems: 'center',
+        backgroundColor: '#B71C1C',
+        padding: 5
+    }
+    , buttonGroup: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20
+    },
+    textInput: {
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        marginTop: 10,
+        padding: 10,
+        flex: 1
+    },
+    viewRow: {
+        flexDirection: 'row',
+        marginTop: 10,
+    }
+});
 
 export default modalInput;

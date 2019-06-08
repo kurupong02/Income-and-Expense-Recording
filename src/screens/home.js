@@ -14,10 +14,10 @@ class Home extends Component {
         super(props);
         this.state = {
             datePickerVisible: false,
-            isModalVisible:false,
+            isModalVisible: false,
             date: new Date(),
             income: 0,
-            expense : 0,
+            expense: 0,
             total: 0
         };
     }
@@ -35,43 +35,38 @@ class Home extends Component {
     };
 
     handleDatePicked = date => {
-        console.log(date)
-        this.setState({ date },()=>{
+        this.setState({ date }, () => {
             this.getData()
         })
         this.isDateTimePicker();
     };
 
-    refresh = () => {
-        this.getData()
-    }
-
-    getData(){
+    getData = () =>  {
         const _this = this
-        const { date } =  this.state;
-        var nextDay = new Date(date);
-        nextDay.setDate(date.getDate()+1);
-        const dateStart = new Date(date.setHours(0)); 
-        const dateEnd = new Date(nextDay.setHours(23)); 
+        const { date } = this.state;
+        const dateStart = new Date(date.setHours(0,0,0));
+        const dateEnd = new Date(date.setHours(23,59,59));
 
         const filter = `{"where":{"date":{"between": ["${dateStart}","${dateEnd}"]}}}`
+        
         API.get(`/items?filter=${filter}`)
-        .then(function (response) {
-            _this.setValue(response.data)
-        })
-        .catch(function (error) {
-            
-        })
+            .then(function (response) {
+                _this.setValue(response.data)
+            })
+            .catch(function (error) {
+
+            })
     }
 
-    setValue(listData){
-        var income = _.sumBy(listData, function(o) { if(o.title == 'รายรับ'){return o.value;} });
-        var expense = _.sumBy(listData, function(o) { if(o.title == 'รายจ่าย'){return o.value;} });
+    setValue(listData) {
+        var income = _.sumBy(listData, function (o) { if (o.title == 'รายรับ') { return o.value; } });
+        var expense = _.sumBy(listData, function (o) { if (o.title == 'รายจ่าย') { return o.value; } });
 
-        if(income == undefined){
+        if (income == undefined) {
             income = 0
         }
-        if(expense == undefined){
+        
+        if (expense == undefined) {
             expense = 0
         }
 
@@ -90,26 +85,29 @@ class Home extends Component {
                     onConfirm={this.handleDatePicked}
                     onCancel={this.isDateTimePicker}
                     format="YYYY-MM-DD"
-                    date ={date}
+                    date={date}
                 />
-                <ModalInput isModalVisible={isModalVisible} isModal = {this.isModal}  refresh = {this.refresh}/>
+                <ModalInput isModalVisible={isModalVisible} isModal={this.isModal} getData={this.getData} />
                 <Button title={Moment(date).format('L')} onPress={this.isDateTimePicker}></Button>
+
                 <View style={styles.body}>
-                    <View style = {{alignItems: 'center',borderRightWidth:1,borderRightColor:'#E0E0E0',flex:1}}>
+                    <View style={styles.bodyTitle}>
                         <Text>รายรับ</Text>
-                        <Text style= {{color:"#388E3C"}}>฿{income}</Text>
+                        <Text style={{ color: "#388E3C" }}>฿{income}</Text>
                     </View>
-                    <View style = {{alignItems: 'center',borderRightWidth:1,borderRightColor:'#E0E0E0',flex:1}}>
+                    <View style={styles.bodyTitleborder}/>
+                    <View style={styles.bodyTitle}>
                         <Text>รายจ่าย</Text>
-                        <Text style= {{color:"#FF5252"}}>฿{expense}</Text>
+                        <Text style={{ color: "#FF5252" }}>฿{expense}</Text>
                     </View>
-                    <View style = {{alignItems: 'center',flex:1}}>
+                    <View style={styles.bodyTitleborder}/>
+                    <View style={styles.bodyTitle}>
                         <Text>รวม</Text>
-                        <Text style= {{color : total >= 0? '#388E3C':'#FF5252'}}>฿{total}</Text>
+                        <Text style={{ color: total >= 0 ? '#388E3C' : '#FF5252' }}>฿{total}</Text>
                     </View>
                 </View>
                 <View style={styles.body}>
-                <ListItem listData = {listData}/>
+                    <ListItem listData={listData} />
                 </View>
                 <FAB
                     buttonColor="red"
@@ -129,10 +127,18 @@ const styles = StyleSheet.create({
     },
     body: {
         padding: 10,
-        borderTopWidth:1,
-        borderTopColor:"#E0E0E0",
-        flexDirection:'row',
-    }
+        borderTopWidth: 1,
+        borderTopColor: "#E0E0E0",
+        flexDirection: 'row',
+    },
+    bodyTitle:{
+        alignItems: 'center', 
+        flex: 1 
+    },
+    bodyTitleborder:{
+        borderRightWidth: 1, 
+        borderRightColor: '#E0E0E0'
+    },
 });
 
 export default Home;
